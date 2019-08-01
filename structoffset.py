@@ -1,4 +1,4 @@
-# Time-stamp: </Users/nico/_code/Python/lldbutils/structoffset.py, 2019-07-30 Tuesday 17:40:47 nico>
+# Time-stamp: </Users/nico/_code/Python/lldbutils/structoffset.py, 2019-08-01 Thursday 19:35:25 nico>
 
 from __future__ import print_function
 import lldb
@@ -36,3 +36,26 @@ def print_offsets(ttype, target=lldb.target):
         else:
             spc = ' '
         print(typeinfo[0], '\t', typeinfo[2], '\t', typeinfo[1], spc, typeinfo[3], sep="")
+
+
+def get_member_name(ttype, m_off, target=lldb.target):
+    if isinstance(ttype, basestring):
+        ttype = target.FindFirstType(ttype)
+    for tt in ttype.get_fields_array():
+        if tt.GetOffsetInBytes() == int(m_off):
+            return tt.GetName()
+
+
+def get_member_info(ttype, m_off, target=lldb.target):
+    if isinstance(ttype, basestring):
+        ttype = target.FindFirstType(ttype)
+    for tt in ttype.get_fields_array():
+        if tt.GetOffsetInBytes() == int(m_off):
+            return [(hex(tt.GetOffsetInBytes()),
+                         tt.GetType().GetDisplayTypeName(),
+                         tt.GetType().GetByteSize(),
+                         tt.GetName())]
+
+
+def print_member_info(ttype, m_off, target=lldb.target):
+    print_offsets(get_member_info(ttype, m_off, target), target)
